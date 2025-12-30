@@ -1,0 +1,333 @@
+import { useState, useEffect } from 'react';
+import UserLogin from './pages/UserLogin';
+import UserSignup from './pages/UserSignup';
+import UserDashboard from './pages/UserDashboard';
+import UserOrders from './pages/UserOrders';
+import WalletHistory from './pages/WalletHistory';
+import OrderDetails from './pages/OrderDetails';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminOrderManagement from './pages/AdminOrderManagement';
+import AdminOrderCreate from './pages/AdminOrderCreate';
+import { Menu } from 'lucide-react';
+
+type View = 'user-login' | 'user-signup' | 'user-dashboard' | 'user-orders' | 'user-wallet' | 'user-order-details' | 'admin-login' | 'admin-dashboard' | 'admin-orders' | 'admin-create-order' | 'admin-order-details';
+
+const mockUser = {
+  id: '11111111-1111-1111-1111-111111111111',
+  full_name: 'Test Driver',
+  email: 'testdriver@example.com',
+  mobile_number: '9876543210',
+  district: 'Mumbai',
+  vehicle_type: 'truck',
+  wheel_type: '6-wheel',
+  referral_code: 'TEST123',
+  referred_by: null,
+  reward_wallet: 500,
+  diesel_wallet: 400,
+  approval_status: 'approved'
+};
+
+const mockAdmin = {
+  id: '96ec278a-6f20-4796-9648-90a59fff89ed',
+  username: 'admin'
+};
+
+function App() {
+  const [currentView, setCurrentView] = useState<View>('user-login');
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [currentAdmin, setCurrentAdmin] = useState<any>(null);
+  const [showDevMenu, setShowDevMenu] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('gotruck_user');
+    const savedAdmin = localStorage.getItem('gotruck_admin');
+
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+      setCurrentView('user-dashboard');
+    } else if (savedAdmin) {
+      setCurrentAdmin(JSON.parse(savedAdmin));
+      setCurrentView('admin-dashboard');
+    } else {
+      const path = window.location.pathname;
+      if (path === '/admin') {
+        setCurrentView('admin-login');
+      } else {
+        setCurrentView('user-login');
+      }
+    }
+  }, []);
+
+  const handleUserLogin = (user: any) => {
+    setCurrentUser(user);
+    localStorage.setItem('gotruck_user', JSON.stringify(user));
+    setCurrentView('user-dashboard');
+  };
+
+  const handleAdminLogin = (admin: any) => {
+    setCurrentAdmin(admin);
+    localStorage.setItem('gotruck_admin', JSON.stringify(admin));
+    setCurrentView('admin-dashboard');
+  };
+
+  const handleUserLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('gotruck_user');
+    setCurrentView('user-login');
+  };
+
+  const handleAdminLogout = () => {
+    setCurrentAdmin(null);
+    localStorage.removeItem('gotruck_admin');
+    setCurrentView('admin-login');
+  };
+
+  const handleSignupSuccess = () => {
+    setCurrentView('user-login');
+  };
+
+  const navigateToView = (view: View) => {
+    setCurrentView(view);
+    if (view === 'user-dashboard' || view === 'user-orders' || view === 'user-wallet') {
+      setCurrentUser(mockUser);
+    } else if (view === 'admin-dashboard' || view === 'admin-orders' || view === 'admin-create-order') {
+      setCurrentAdmin(mockAdmin);
+    }
+    setShowDevMenu(false);
+  };
+
+  const DevMenu = () => (
+    <>
+      <button
+        onClick={() => setShowDevMenu(!showDevMenu)}
+        className="fixed top-4 right-4 z-50 w-12 h-12 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg flex items-center justify-center transition-all"
+        title="Developer Menu"
+      >
+        <Menu className="w-6 h-6" />
+      </button>
+
+      {showDevMenu && (
+        <div className="fixed top-20 right-4 z-50 bg-white rounded-xl shadow-2xl p-4 w-64 border border-slate-200">
+          <h3 className="text-sm font-bold text-slate-900 mb-3 pb-2 border-b border-slate-200">
+            Developer Navigation
+          </h3>
+          <div className="space-y-2">
+            <button
+              onClick={() => navigateToView('user-login')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              User Login
+            </button>
+            <button
+              onClick={() => navigateToView('user-signup')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              User Signup
+            </button>
+            <button
+              onClick={() => navigateToView('user-dashboard')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+            >
+              User Dashboard
+            </button>
+            <button
+              onClick={() => navigateToView('user-orders')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+            >
+              User Orders
+            </button>
+            <button
+              onClick={() => navigateToView('user-wallet')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
+            >
+              Wallet History
+            </button>
+            <button
+              onClick={() => navigateToView('admin-login')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-slate-100 transition-colors"
+            >
+              Admin Login
+            </button>
+            <button
+              onClick={() => navigateToView('admin-dashboard')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+            >
+              Admin Dashboard
+            </button>
+            <button
+              onClick={() => navigateToView('admin-orders')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+            >
+              Admin Orders
+            </button>
+            <button
+              onClick={() => navigateToView('admin-create-order')}
+              className="w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-red-50 text-red-600 transition-colors"
+            >
+              Create Order
+            </button>
+          </div>
+        </div>
+      )}
+    </>
+  );
+
+  if (currentView === 'user-login') {
+    return (
+      <>
+        <DevMenu />
+        <UserLogin
+          onLogin={handleUserLogin}
+          onNavigateToSignup={() => setCurrentView('user-signup')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'user-signup') {
+    return (
+      <>
+        <DevMenu />
+        <UserSignup
+          onSignupSuccess={handleSignupSuccess}
+          onNavigateToLogin={() => setCurrentView('user-login')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'user-dashboard' && currentUser) {
+    return (
+      <>
+        <DevMenu />
+        <UserDashboard
+          user={currentUser}
+          onLogout={handleUserLogout}
+          onNavigateToOrders={() => setCurrentView('user-orders')}
+          onNavigateToWallet={() => setCurrentView('user-wallet')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'user-orders' && currentUser) {
+    return (
+      <>
+        <DevMenu />
+        <UserOrders
+          user={currentUser}
+          onBack={() => setCurrentView('user-dashboard')}
+          onViewOrder={(orderId) => {
+            setSelectedOrderId(orderId);
+            setCurrentView('user-order-details');
+          }}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'user-order-details' && currentUser && selectedOrderId) {
+    return (
+      <>
+        <DevMenu />
+        <OrderDetails
+          orderId={selectedOrderId}
+          isAdmin={false}
+          onBack={() => setCurrentView('user-orders')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'user-wallet' && currentUser) {
+    return (
+      <>
+        <DevMenu />
+        <WalletHistory
+          user={currentUser}
+          onBack={() => setCurrentView('user-dashboard')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'admin-login') {
+    return (
+      <>
+        <DevMenu />
+        <AdminLogin onLogin={handleAdminLogin} />
+      </>
+    );
+  }
+
+  if (currentView === 'admin-dashboard' && currentAdmin) {
+    return (
+      <>
+        <DevMenu />
+        <AdminDashboard
+          _admin={currentAdmin}
+          onLogout={handleAdminLogout}
+          onNavigateToCreateOrder={() => setCurrentView('admin-create-order')}
+          onNavigateToOrderManagement={() => setCurrentView('admin-orders')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'admin-orders' && currentAdmin) {
+    return (
+      <>
+        <DevMenu />
+        <AdminOrderManagement
+          admin={currentAdmin}
+          onBack={() => setCurrentView('admin-dashboard')}
+          onViewOrder={(orderId) => {
+            setSelectedOrderId(orderId);
+            setCurrentView('admin-order-details');
+          }}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'admin-order-details' && currentAdmin && selectedOrderId) {
+    return (
+      <>
+        <DevMenu />
+        <OrderDetails
+          orderId={selectedOrderId}
+          isAdmin={true}
+          onBack={() => setCurrentView('admin-orders')}
+        />
+      </>
+    );
+  }
+
+  if (currentView === 'admin-create-order' && currentAdmin) {
+    return (
+      <>
+        <DevMenu />
+        <AdminOrderCreate
+          // admin={currentAdmin}
+          _admin={currentAdmin}
+          onBack={() => setCurrentView('admin-dashboard')}
+          onSuccess={() => setCurrentView('admin-orders')}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <DevMenu />
+      <UserLogin
+        onLogin={handleUserLogin}
+        onNavigateToSignup={() => setCurrentView('user-signup')}
+      />
+    </>
+  );
+}
+
+export default App;
